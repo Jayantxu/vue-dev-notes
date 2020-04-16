@@ -4,13 +4,17 @@ import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 
-export function createCompilerCreator (baseCompile: Function): Function {
+
+// createCompilerCreator编译器创建的创造者 返回一个createCompiler编译函数，函数柯里化编程 ，缓存baseCompile基本的编译函数
+
+export function createCompilerCreator (     baseCompile: Function     ): Function {
+  // 返回一个  createCompiler 编译函数
   return function createCompiler (baseOptions: CompilerOptions) {
     function compile (
       template: string,
       options?: CompilerOptions
     ): CompiledResult {
-      const finalOptions = Object.create(baseOptions)
+      const finalOptions = Object.create(baseOptions) // 克隆对象  baseOptions
       const errors = []
       const tips = []
 
@@ -58,6 +62,8 @@ export function createCompilerCreator (baseCompile: Function): Function {
 
       finalOptions.warn = warn
 
+      // 然后调用 baseCompile 函数
+      // .\src\compiler\index.js
       const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
         detectErrors(compiled.ast, warn)

@@ -22,7 +22,7 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
-  el = el && query(el)
+  el = el && query(el) // 
 
   /* istanbul ignore if */
   // 节点做了限制，不能挂载在body， html上
@@ -37,10 +37,10 @@ Vue.prototype.$mount = function (
   // resolve template/el and convert to render function
   // 判断option中是否有render   使用template或render   始终都会经过render
   if (!options.render) {
-    let template = options.template
+    let template = options.template // 判断是否有options.template
     if (template) {
       if (typeof template === 'string') {
-        if (template.charAt(0) === '#') {
+        if (template.charAt(0) === '#') {// 如果是  id  则获取dom 中 html
           template = idToTemplate(template)
           /* istanbul ignore if */
           if (process.env.NODE_ENV !== 'production' && !template) {
@@ -59,6 +59,7 @@ Vue.prototype.$mount = function (
         return this
       }
     } else if (el) {
+      // 如果没有template，则从  el  中找 innerHTML
       template = getOuterHTML(el)
     }
     if (template) {
@@ -66,12 +67,13 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-      // 它是调用 compileToFunctions 方法实现的
+      // 获取到  template 之后，它是调用 compileToFunctions 方法实现的
       const { render, staticRenderFns } = compileToFunctions(template, {
+        // 执行  compileToFunctions  创建一个缓存模板字符串函数，
         outputSourceRange: process.env.NODE_ENV !== 'production',
-        shouldDecodeNewlines,
+        shouldDecodeNewlines, // false 
         shouldDecodeNewlinesForHref,
-        delimiters: options.delimiters,
+        delimiters: options.delimiters, // 改变纯文本插入分割符
         comments: options.comments
       }, this)
       options.render = render
@@ -85,7 +87,7 @@ Vue.prototype.$mount = function (
     }
   }
   // 处理完挂载上去 /**最终还是调用了mount  在 platforms/web/runtime/index.js中 */
-  return mount.call(this, el, hydrating)
+  return mount.call(this, el, hydrating)  // 调用  Vue.prototype.$mount
 }
 
 /**

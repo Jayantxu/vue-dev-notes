@@ -15,7 +15,7 @@ export function initEvents (vm: Component) {
   vm._hasHookEvent = false
   // init parent attached events
   const listeners = vm.$options._parentListeners
-  if (listeners) {
+  if (listeners) { // 如果 vm.$options._parentListeners 事件存在
     updateComponentListeners(vm, listeners)
   }
 }
@@ -39,7 +39,7 @@ function createOnceHandler (event, fn) {
     }
   }
 }
-
+// 更新组件事件
 export function updateComponentListeners (
   vm: Component,
   listeners: Object,

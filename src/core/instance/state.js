@@ -60,20 +60,21 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 
 
 export function initState (vm: Component) {
-  vm._watchers = []
+  vm._watchers = [] // 为  vue 实例 vm 添加 _watchers观察者队列
   const opts = vm.$options
   // # initProp的时候
-  if (opts.props) initProps(vm, opts.props)
-  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.props) initProps(vm, opts.props)  // 初始化props
+  if (opts.methods) initMethods(vm, opts.methods) // 初始化事件，校验事件的 key 有没有和 props 属性一样，
   // 挂载数据 # initData的时候
   if (opts.data) {
-    initData(vm)
+    initData(vm) // 初始化数据
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
-  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.computed) initComputed(vm, opts.computed) // 初始化计算属性
+  // 如果 options 中有 watch，用户定义了watch
   if (opts.watch && opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch)
+    initWatch(vm, opts.watch) // 初始化 Watch
   }
 }
 
@@ -91,8 +92,10 @@ function initProps (vm: Component, propsOptions: Object) {
   // 遍历props数据, 
   // 目的一：L109的defineReactive方法变为响应式、
   // 目的二、L115的proxy方法，挂载再vm上,可以通过this访问
-  for (const key in propsOptions) {
+  for (const key in propsOptions) { // 循环propsOptions 的key
     keys.push(key)
+
+    // 调用  validateProp 验证props 是否符合规范，
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
@@ -116,12 +119,13 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 将 props 属性加入观察者
       defineReactive(props, key, value)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
-    if (!(key in vm)) {
+    if (!(key in vm)) {  // 如果 key 不在  this 中， 则加入 vm 中
       proxy(vm, `_props`, key)
     }
   }
@@ -133,14 +137,15 @@ function initProps (vm: Component, propsOptions: Object) {
  * 目的一、对data函数返回的对象进行遍历，并且通过proxy挂载在this（vm）上--L181
  * 目的二、调用observe观测data变化 ---- Line189
  */
+
 function initData (vm: Component) {
   // 找出Vue上的data属性
   let data = vm.$options.data
 
   // 在mergeOptions合并处理后的mergeInstanceDataFn函数，所以判断了一下data是不是function
   // 把data 推出来成为obj
-  data = vm._data = typeof data === 'function'
-    ? getData(data, vm)
+  data = vm._data = typeof data === 'function' // 判断 data 是不是方法
+    ? getData(data, vm) // 如果是方法，getData 拿到数据
     : data || {}
   // 同时定义了_data属性; _data与data引用的都是同一个数据选项
   /*
@@ -170,6 +175,7 @@ function initData (vm: Component) {
   let i = keys.length
   // 循环，目的是在实例对象上进行数据代理
   while (i--) {
+    // 此处循环校验  data 中的 key  不能和  methods 以及 和  props属性中  的 key 一样，否则警告
     const key = keys[i]
     // 预防性提醒
     if (process.env.NODE_ENV !== 'production') {
@@ -189,7 +195,7 @@ function initData (vm: Component) {
     } else if (!isReserved(key)) {
       // isReserved 方法: 检查data的key是否以$或者_开头
       // proxy传入了vm(this), _data, key值；方法在上面, # 从而挂载再_data上
-      proxy(vm, `_data`, key)
+      proxy(vm, `_data`, key)   // 添加到  vm 中
     }
   }
   // observe data
@@ -197,7 +203,7 @@ function initData (vm: Component) {
   // 以上while使用proxy() --- Object.defineProperty 做完数据代理，就进入响应系统
   // observe、watch、dep均在 /Observe文件中
   // 传入两个属性: Vue的data, bool值true
-  observe(data, true /* asRootData */)
+  observe(data, true /* asRootData */) // 把数据添加到观察者中
 }
 
 export function getData (data: Function, vm: Component): any {
@@ -217,10 +223,13 @@ const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
+
+  //  创建  _computedWatchers 监听者对象
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
 
+  // 循环  computed 属性，判断属性key 是否在  this(vm) 中
   for (const key in computed) {
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
@@ -231,7 +240,7 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
 
-    if (!isSSR) {
+    if (!isSSR) { // 不是服务器，数据加入 Watcher  中
       // create internal watcher for the computed property.
       watchers[key] = new Watcher(
         vm,
@@ -245,7 +254,8 @@ function initComputed (vm: Component, computed: Object) {
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
     if (!(key in vm)) {
-      defineComputed(vm, key, userDef)
+      // 是否为浏览器，让浏览器去调用  收集观察者
+      defineComputed(vm, key, userDef) 
     } else if (process.env.NODE_ENV !== 'production') {
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
@@ -256,6 +266,7 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
+// createComputedGetter  为  _computedWatchers  收集观察者，为watcher 添加  dep
 export function defineComputed (
   target: any,
   key: string,
@@ -310,6 +321,8 @@ function createGetterInvoker(fn) {
 
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
+  // 校验事件中的  key  有没有 和 props 属性一样的，如果有一样的或者以 $ _  开头
+  // 则警告
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
       if (typeof methods[key] !== 'function') {
@@ -332,10 +345,13 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
-    vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
+    // 如果没问题，再把 key 放入  vm 中，使用 this 去调用,
+    vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm) // 绑定 this
   }
 }
 
+
+// 遍历options中的watch 调用 createWatcher
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
@@ -349,6 +365,7 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
+// 转义 handler ， 并且为Watch数据建立观察者
 function createWatcher (
   vm: Component,
   expOrFn: string | Function,
@@ -362,6 +379,7 @@ function createWatcher (
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
+  //  调用  $watch, Vue.prototype.$watch  在下面
   return vm.$watch(expOrFn, handler, options)
 }
 
@@ -402,7 +420,9 @@ export function stateMixin (Vue: Class<Component>) {
     }
     options = options || {}
     options.user = true
+    // 实例化 Watcher 观察者 , 判断是否为对象
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    // 是对象的话，深层递归调用 createWatcher
     if (options.immediate) {
       try {
         cb.call(vm, watcher.value)

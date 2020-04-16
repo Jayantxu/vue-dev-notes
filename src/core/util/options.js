@@ -439,6 +439,8 @@ export function mergeOptions (
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
  */
+
+//  
 export function resolveAsset (
   options: Object,
   type: string,

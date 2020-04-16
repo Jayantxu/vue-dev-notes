@@ -101,15 +101,21 @@ export function createFunctionalComponent (
   const options = Ctor.options
   const props = {}
   const propOptions = options.props
+
+  // 如果有定义  propOptions ，遍历
   if (isDef(propOptions)) {
     for (const key in propOptions) {
+      // 使用  validateProp 验证
       props[key] = validateProp(key, propOptions, propsData || emptyObject)
     }
   } else {
+    // 如果没有 定义 propOptions 而是定义了其他属性 data.attr或者 data.prop 
+    // mergeProps 拷贝合并
     if (isDef(data.attrs)) mergeProps(props, data.attrs)
     if (isDef(data.props)) mergeProps(props, data.props)
   }
 
+  // FunctionalRenderContext  安装虚拟dom，事件，data，props，等，使之具有和vue一样的渲染功能
   const renderContext = new FunctionalRenderContext(
     data,
     props,
@@ -118,13 +124,17 @@ export function createFunctionalComponent (
     Ctor
   )
 
+  // 定义 时候传进来的 render 生成  vnode
   const vnode = options.render.call(null, renderContext._c, renderContext)
 
+  // 如果  vnode  instanceof  VNode  
   if (vnode instanceof VNode) {
+    // 调用 方法克隆一个 vnode 
     return cloneAndMarkFunctionalResult(vnode, data, renderContext.parent, options, renderContext)
-  } else if (Array.isArray(vnode)) {
-    const vnodes = normalizeChildren(vnode) || []
+  } else if (Array.isArray(vnode)) {  // 如果 vnode  是数组
+    const vnodes = normalizeChildren(vnode) || [] // normalizeChildren 创建一个规范化的子节点
     const res = new Array(vnodes.length)
+    // 循环  vnodes 调用 方法
     for (let i = 0; i < vnodes.length; i++) {
       res[i] = cloneAndMarkFunctionalResult(vnodes[i], data, renderContext.parent, options, renderContext)
     }

@@ -24,6 +24,11 @@ let uid = 0
  * This is used for both the $watch() api and directives.
  */
 // watcher方法
+/**
+ * Watcher实例化，把对象添加到vm 中，添加  id 和 记录渲染方式 
+ * 【Watcher标记】
+ */
+
 export default class Watcher {
   vm: Component;
   expression: string;
@@ -42,7 +47,7 @@ export default class Watcher {
   before: ?Function;
   getter: Function;
   value: any;
-
+  
   constructor (
     vm: Component,
     expOrFn: string | Function,
@@ -94,6 +99,8 @@ export default class Watcher {
         )
       }
     }
+
+    // 如果 lazy 为假，调用 get 方法
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -103,11 +110,11 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    pushTarget(this)
+    pushTarget(this) // 调用 pushTarget 把 Watcher 实例化对象添加到 targetStack 队列中，
     let value
     const vm = this.vm
     try {
-      value = this.getter.call(vm, vm)
+      value = this.getter.call(vm, vm) // 调用 getter 获取值，  --- >  this.getter = expOrFn  所以此处  expOrFn 是 updateComponent
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
@@ -135,7 +142,7 @@ export default class Watcher {
       this.newDepIds.add(id)
       this.newDeps.push(dep)
       if (!this.depIds.has(id)) {
-        dep.addSub(this)
+        dep.addSub(this) //  addSub 为 sub 队列，添加一个Watcher 实例化对象
       }
     }
   }
@@ -143,12 +150,13 @@ export default class Watcher {
   /**
    * Clean up for dependency collection.
    */
+  // 清理观察者依赖项集合
   cleanupDeps () {
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
       if (!this.newDepIds.has(dep.id)) {
-        dep.removeSub(this)
+        dep.removeSub(this)  // 调用removeSub， 
       }
     }
     let tmp = this.depIds
@@ -165,14 +173,15 @@ export default class Watcher {
    * Subscriber interface.
    * Will be called when a dependency changes.
    */
+  // 更新数据
   update () {
     /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true
-    } else if (this.sync) {
+    } else if (this.sync) { //  lazy 为 false，sync 为 true，同步更新,
       this.run()
-    } else {
-      queueWatcher(this)
+    } else { // 如果  lazy 为 false， sync  为  false，
+      queueWatcher(this) // 可能多个观察者调用 queueWatcher
     }
   }
 
@@ -180,6 +189,7 @@ export default class Watcher {
    * Scheduler job interface.
    * Will be called by the scheduler.
    */
+  // 更新 callback数据，更新 callback 回调，
   run () {
     if (this.active) {
       const value = this.get()

@@ -34,20 +34,25 @@ export function createAsyncPlaceholder (
   children: ?Array<VNode>,
   tag: ?string
 ): VNode {
+  // 
   const node = createEmptyVNode()
   node.asyncFactory = factory
   node.asyncMeta = { data, context, children, tag }
   return node
 }
 
+
+// 解决异步组件，更新组件数据
 export function resolveAsyncComponent (
   factory: Function,
   baseCtor: Class<Component>
 ): Class<Component> | void {
+
   if (isTrue(factory.error) && isDef(factory.errorComp)) {
     return factory.errorComp
   }
 
+  // 根据判断 factory函数，
   if (isDef(factory.resolved)) {
     return factory.resolved
   }

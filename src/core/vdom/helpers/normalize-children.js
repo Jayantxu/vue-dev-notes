@@ -15,6 +15,8 @@ import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 // normalization is needed - if any child is an Array, we flatten the whole
 // thing with Array.prototype.concat. It is guaranteed to be only 1-level deep
 // because functional components already normalize their own children.
+
+// 遍历 子节点，把伪数组变成真正的数组返回，并且 连在一起
 export function simpleNormalizeChildren (children: any) {
   for (let i = 0; i < children.length; i++) {
     if (Array.isArray(children[i])) {
@@ -28,11 +30,14 @@ export function simpleNormalizeChildren (children: any) {
 // e.g. <template>, <slot>, v-for, or when the children is provided by user
 // with hand-written render functions / JSX. In such cases a full normalization
 // is needed to cater to all possible types of children values.
+
+// normalizeChildren 判断 children 的数据类型，而创建不同的虚拟 DOM
 export function normalizeChildren (children: any): ?Array<VNode> {
+  // src\shared\util.js  isPrimitive ->  
   return isPrimitive(children)
-    ? [createTextVNode(children)]
-    : Array.isArray(children)
-      ? normalizeArrayChildren(children)
+    ? [createTextVNode(children)] // 数据类型为 string， number，symbol，boolean，调用 createTextVNode 创建文本节点虚拟
+    : Array.isArray(children) // 数据类型不是  string， number，symbol，boolean， 判断是否为 array
+      ? normalizeArrayChildren(children) // 是数组，调用 normalizeArrayChildren
       : undefined
 }
 
@@ -40,16 +45,23 @@ function isTextNode (node): boolean {
   return isDef(node) && isDef(node.text) && isFalse(node.isComment)
 }
 
+
+//  normalizeArrayChildren 接收两个参数 ， children 要规范的子节点
 function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNode> {
   const res = []
   let i, c, lastIndex, last
+
+  // 遍历children
   for (i = 0; i < children.length; i++) {
-    c = children[i]
+    c = children[i] // 获得单个节点 c
     if (isUndef(c) || typeof c === 'boolean') continue
     lastIndex = res.length - 1
     last = res[lastIndex]
+
+    // 以下对 c 的类型进行判断
     //  nested
     if (Array.isArray(c)) {
+      // 如果是数组，递归调用 normalizeArrayChildren
       if (c.length > 0) {
         c = normalizeArrayChildren(c, `${nestedIndex || ''}_${i}`)
         // merge adjacent text nodes
@@ -60,6 +72,8 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
         res.push.apply(res, c)
       }
     } else if (isPrimitive(c)) {
+      // 如果是基础类型，则通过  createTextVNode 转为 VNode类型
+
       if (isTextNode(last)) {
         // merge adjacent text nodes
         // this is necessary for SSR hydration because text nodes are

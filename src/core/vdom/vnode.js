@@ -75,12 +75,13 @@ export default class VNode {
 }
 
 export const createEmptyVNode = (text: string = '') => {
-  const node = new VNode()
+  const node = new VNode()  // VNode 定义
   node.text = text
   node.isComment = true
   return node
 }
 
+// 创建 文本节点虚拟DOM
 export function createTextVNode (val: string | number) {
   return new VNode(undefined, undefined, undefined, String(val))
 }
@@ -89,6 +90,7 @@ export function createTextVNode (val: string | number) {
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
+// clone节点，
 export function cloneVNode (vnode: VNode): VNode {
   const cloned = new VNode(
     vnode.tag,
@@ -104,13 +106,13 @@ export function cloneVNode (vnode: VNode): VNode {
     vnode.asyncFactory
   )
   cloned.ns = vnode.ns
-  cloned.isStatic = vnode.isStatic
+  cloned.isStatic = vnode.isStatic // 把节点变成静态节点
   cloned.key = vnode.key
   cloned.isComment = vnode.isComment
   cloned.fnContext = vnode.fnContext
   cloned.fnOptions = vnode.fnOptions
   cloned.fnScopeId = vnode.fnScopeId
   cloned.asyncMeta = vnode.asyncMeta
-  cloned.isCloned = true
+  cloned.isCloned = true // 把 isCloned 标记为 真
   return cloned
 }

@@ -40,7 +40,7 @@ export function initLifecycle (vm: Component) {
     }
     parent.$children.push(vm)
   }
-  // 对vm(this)做了一些初始化准备工作
+  // 对vm(this)做了一些初始化准备工作，添加一些属性标识
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
@@ -56,10 +56,13 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+
+
+  // update  更新 view 试图
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
-    const prevVnode = vm._vnode
+    const prevVnode = vm._vnode //  VNODE
     const restoreActiveInstance = setActiveInstance(vm)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
@@ -172,7 +175,10 @@ export function mountComponent (
       }
     }
   }
-  callHook(vm, 'beforeMount')
+  callHook(vm, 'beforeMount') // 执行一下  生命 周期函数  beforeMount
+
+
+  // updateComponent  更新组件
 
   let updateComponent
   /* istanbul ignore if */
@@ -185,28 +191,28 @@ export function mountComponent (
 
       mark(startTag)
       // 生成虚拟DOM /** 如何生成虚拟DOM得呢？ rc/core/instance/render.js */
-      const vnode = vm._render()
+      const vnode = vm._render()  // _render 循环 $slots，返回 vnode
       mark(endTag)
       measure(`vue ${name} render`, startTag, endTag)
 
       mark(startTag)
       // 更新DOM
-      vm._update(vnode, hydrating)
+      vm._update(vnode, hydrating)  // 调用 Vue.prototype._update
       mark(endTag)
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
     updateComponent = () => {
-      vm._update(vm._render(), hydrating)
+      vm._update(vm._render(), hydrating)// 调用 Vue.prototype._update
     }
   }
 
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  /**实例化一个watcher */
+  /**实例化一个watcher */  // new Watcher
   new Watcher(vm, updateComponent, noop, {
-    before () {
+    before () { // 如果  _isMounted 为真，没触发过钩子函数
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }
@@ -344,6 +350,7 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+// 
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
@@ -354,7 +361,7 @@ export function callHook (vm: Component, hook: string) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
-  if (vm._hasHookEvent) {
+  if (vm._hasHookEvent) { // 如果是   _hasHookEvent  则触发父组件钩子函数
     vm.$emit('hook:' + hook)
   }
   popTarget()

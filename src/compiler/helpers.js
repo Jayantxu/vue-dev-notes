@@ -11,6 +11,8 @@ export function baseWarn (msg: string, range?: Range) {
 }
 /* eslint-enable no-unused-vars */
 
+
+// 循环过滤数组或者对象的值，根据key 循环，过滤对象或者数组  key  值，
 export function pluckModuleFunction<F: Function> (
   modules: ?Array<Object>,
   key: string

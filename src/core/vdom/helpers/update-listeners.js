@@ -49,11 +49,11 @@ export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component
   invoker.fns = fns
   return invoker
 }
-
+//  删除旧事件，添加新事件，更新事件
 export function updateListeners (
   on: Object,
   oldOn: Object,
-  add: Function,
+  add: Function, // add 添加事件
   remove: Function,
   createOnceHandler: Function,
   vm: Component
@@ -77,9 +77,10 @@ export function updateListeners (
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur, vm)
       }
-      if (isTrue(event.once)) {
+      if (isTrue(event.once)) { // 判断 once 标识， 为 once 只执行一次
         cur = on[name] = createOnceHandler(event.name, cur, event.capture)
       }
+      // $on
       add(event.name, cur, event.capture, event.passive, event.params)
     } else if (cur !== old) {
       old.fns = cur

@@ -27,11 +27,9 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
   isStaticKey = genStaticKeysCached(options.staticKeys || '')
   isPlatformReservedTag = options.isReservedTag || no
   // first pass: mark all non-static nodes.
-  // 标记静态节点
-  markStatic(root)
-  // 标记静态根节点
+  markStatic(root)// 标记静态节点
   // second pass: mark static roots.
-  markStaticRoots(root, false)
+  markStaticRoots(root, false)// 标记静态根节点
 }
 
 function genStaticKeys (keys: string): Function {
@@ -40,7 +38,7 @@ function genStaticKeys (keys: string): Function {
     (keys ? ',' + keys : '')
   )
 }
-
+// 标记静态节点
 function markStatic (node: ASTNode) {
   node.static = isStatic(node)
   if (node.type === 1) {
@@ -54,6 +52,7 @@ function markStatic (node: ASTNode) {
     ) {
       return
     }
+    // 循环递归虚拟node，标记是不是静态节点
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       markStatic(child)
@@ -73,6 +72,8 @@ function markStatic (node: ASTNode) {
   }
 }
 
+
+// 标识静态根节点
 function markStaticRoots (node: ASTNode, isInFor: boolean) {
   if (node.type === 1) {
     if (node.static || node.once) {

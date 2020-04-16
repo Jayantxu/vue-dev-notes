@@ -42,6 +42,7 @@ export function extractPropsFromVNodeData (
           )
         }
       }
+      // checkProp 检查属性 key 与 altKey
       checkProp(res, props, key, altKey, true) ||
       checkProp(res, attrs, key, altKey, false)
     }

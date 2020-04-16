@@ -68,6 +68,7 @@ if (inBrowser && !isIE) {
 /**
  * Flush both queues and run the watchers.
  */
+// 改变 queue 队列排序，根据 Watcher实例化对象  id 排序，
 function flushSchedulerQueue () {
   currentFlushTimestamp = getNow()
   flushing = true
@@ -81,7 +82,7 @@ function flushSchedulerQueue () {
   //    user watchers are created before the render watcher)
   // 3. If a component is destroyed during a parent component's watcher run,
   //    its watchers can be skipped.
-  queue.sort((a, b) => a.id - b.id)
+  queue.sort((a, b) => a.id - b.id) // 根据id排序
 
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
@@ -92,7 +93,9 @@ function flushSchedulerQueue () {
     }
     id = watcher.id
     has[id] = null
-    watcher.run()
+
+    watcher.run() // 然后再循环调用 watcher.run
+    
     // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
@@ -179,6 +182,8 @@ export function queueWatcher (watcher: Watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true
+      
+      // flushSchedulerQueue  改变queue队列排序，根据  Watcher 实例化对象排序
 
       if (process.env.NODE_ENV !== 'production' && !config.async) {
         flushSchedulerQueue()

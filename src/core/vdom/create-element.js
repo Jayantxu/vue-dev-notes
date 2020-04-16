@@ -54,6 +54,8 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+
+  // 如何 data 或者 tag 不存在，则会调用 createEmptyVNode 创建一个虚拟DOM节点
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -91,15 +93,18 @@ export function _createElement (
     children.length = 0
   }
   // 对子节点得处理，根据子节点规范进行的处理
-  if (normalizationType === ALWAYS_NORMALIZE) {
-    children = normalizeChildren(children)
-  } else if (normalizationType === SIMPLE_NORMALIZE) {
-    children = simpleNormalizeChildren(children)
+  if (normalizationType === ALWAYS_NORMALIZE) {  // ALWAYS_NORMALIZE = 2
+    children = normalizeChildren(children) // 如果  normalizationType 等于 2，传入 child
+  } else if (normalizationType === SIMPLE_NORMALIZE) { // SIMPLE_NORMALIZE = 1
+    children = simpleNormalizeChildren(children) // 将 children 传入
   }
   let vnode, ns
+
+  // 如果  tag 是一个  string
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    // 判断  tag 是不是html 原有的标签
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
@@ -109,12 +114,15 @@ export function _createElement (
         )
       }
       /** 创建 虚拟VNODE */
-      vnode = new VNode(
+      // 如果是  HTML 原有的标签 ， 创建一个  虚拟  DOM
+      vnode = new VNode( 
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
+
+      // 如果不是  HTML 原有的标签， 调用   resolveAsset    ^^^ 检测 components 中是否有该标签，如果有才是组件
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements

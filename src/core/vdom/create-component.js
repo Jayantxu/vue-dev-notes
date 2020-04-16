@@ -34,16 +34,21 @@ import {
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
+  // init 初始化组件
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
     if (
       vnode.componentInstance &&
       !vnode.componentInstance._isDestroyed &&
       vnode.data.keepAlive
     ) {
+      // 为  true 的时候
       // kept-alive components, treat as a patch
       const mountedNode: any = vnode // work around flow
+
+      // 使用  prepatch  更新组件
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 为 false的时候 , 调用函数
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
@@ -55,6 +60,8 @@ const componentVNodeHooks = {
   prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
     const options = vnode.componentOptions
     const child = vnode.componentInstance = oldVnode.componentInstance
+    
+    // 使用 updateChildComponent 更新子组件
     updateChildComponent(
       child,
       options.propsData, // updated props
@@ -64,22 +71,23 @@ const componentVNodeHooks = {
     )
   },
 
+  // insert 触发  mounted 钩子函数
   insert (vnode: MountedComponentVNode) {
     const { context, componentInstance } = vnode
     if (!componentInstance._isMounted) {
       componentInstance._isMounted = true
       callHook(componentInstance, 'mounted')
     }
-    if (vnode.data.keepAlive) {
+    if (vnode.data.keepAlive) { // 如果是 keepAlive,则已经触发过了
       if (context._isMounted) {
         // vue-router#1212
         // During updates, a kept-alive component's child components may
         // change, so directly walking the tree here may call activated hooks
         // on incorrect children. Instead we push them into a queue which will
         // be processed after the whole patch process ended.
-        queueActivatedComponent(componentInstance)
+        queueActivatedComponent(componentInstance) // 添加活跃组件函数
       } else {
-        activateChildComponent(componentInstance, true /* direct */)
+        activateChildComponent(componentInstance, true /* direct */) // 判断是否有不活跃的组件，禁用
       }
     }
   },
@@ -98,6 +106,8 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+
+//  createComponents 创建组件，【标记】
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
@@ -105,13 +115,15 @@ export function createComponent (
   children: ?Array<VNode>,
   tag?: string
 ): VNode | Array<VNode> | void {
-  if (isUndef(Ctor)) {
+  if (isUndef(Ctor)) {// isUndef 判断数据
     return
   }
 
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
+
+  //  Ctor 如果是对象  调用 extend将
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
@@ -127,13 +139,16 @@ export function createComponent (
 
   // async component
   let asyncFactory
-  if (isUndef(Ctor.cid)) {
-    asyncFactory = Ctor
-    Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
+  if (isUndef(Ctor.cid)) { // 如果没有定义 有组件的 id 
+    asyncFactory = Ctor 
+    Ctor = resolveAsyncComponent(asyncFactory, baseCtor) // 异步组件
+    // 如果  Ctor 为 undefined
     if (Ctor === undefined) {
       // return a placeholder node for async component, which is rendered
       // as a comment node but preserves all the raw information for the node.
       // the information will be used for async server-rendering and hydration.
+
+      // 创建一个简单的占位符，内部使用 createEmptyElement 创建一个虚拟DOM
       return createAsyncPlaceholder(
         asyncFactory,
         data,
@@ -148,18 +163,18 @@ export function createComponent (
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
-  resolveConstructorOptions(Ctor)
+  resolveConstructorOptions(Ctor) // 解析  new  Vue
 
   // transform component v-model data into props & events
   if (isDef(data.model)) {
-    transformModel(Ctor.options, data)
+    transformModel(Ctor.options, data) //将 标签 含有  v-model 信息属性转换
   }
 
   // extract props
-  const propsData = extractPropsFromVNodeData(data, Ctor, tag)
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag) // 把驼峰的 key 转换为 横杠key
 
   // functional component
-  if (isTrue(Ctor.options.functional)) {
+  if (isTrue(Ctor.options.functional)) { // 如果为 true
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
 
@@ -183,6 +198,7 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  // 把 install ComponetHook 把 
   installComponentHooks(data)
 
   // return a placeholder vnode
@@ -205,6 +221,7 @@ export function createComponent (
   return vnode
 }
 
+
 export function createComponentInstanceForVnode (
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
   parent: any, // activeInstance in lifecycle state
@@ -223,11 +240,15 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
+// installComponentHooks把componentVNodeHooks对象里面的方法安装到vonde 的data.hook中
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
+  
+  // 遍历
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
     const existing = hooks[key]
+    // 钩子组件函数
     const toMerge = componentVNodeHooks[key]
     if (existing !== toMerge && !(existing && existing._merged)) {
       hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
@@ -247,6 +268,8 @@ function mergeHook (f1: any, f2: any): Function {
 
 // transform component v-model info (value and callback) into
 // prop and event handler respectively.
+
+// 将标签含有的 v-model 信息属性转换
 function transformModel (options, data: any) {
   const prop = (options.model && options.model.prop) || 'value'
   const event = (options.model && options.model.event) || 'input'

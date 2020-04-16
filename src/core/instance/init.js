@@ -33,24 +33,26 @@ export function initMixin (Vue: Class<Component>) {
     // 在this上定义了属性_isVue
     vm._isVue = true
     // merge options
-    // 判断有没有定义options
+    // 判断有没有定义options，是否为 component
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
-      initInternalComponent(vm, options)
+      initInternalComponent(vm, options) // 是component , 调用 initInternalComponent
     } else {
       // 使用mergeOptions处理传入的参数,返回值给vm.$options赋值；
       // 第一个参数是Vue.options;第二个参数是我们调用Vue构造函数的参数选项;第三个参数vm即this
+
+      // 如果不是组件，将两个组件对象合并  成一个
       vm.$options = mergeOptions(
-        resolveConstructorOptions(vm.constructor),
+        resolveConstructorOptions(vm.constructor), // 合并 vm
         options || {},
         vm
       )
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      initProxy(vm)
+      initProxy(vm) // 代理监听Vue获取值，
     } else {
       vm._renderProxy = vm
     }
@@ -59,20 +61,22 @@ export function initMixin (Vue: Class<Component>) {
     // 生产环境下会为实例添加两个属性，并且属性值等于本身;vm._renderProxy = vm;vm._self = vm;因为vm = this
 
     // 添加了$parent、$children、$refs、_watcher、_inactive、_directInactive、_isMounted、_isDestroyed、_isBeingDestroyed等属性
-    initLifecycle(vm) // 确认组件得父子关系
-    initEvents(vm) // 对on ，@ 呀这些事件进行得一个注册
+    initLifecycle(vm) // 确认组件得父子关系 // 初始化生命周期等标识
+    initEvents(vm) // 对on ，@ 呀这些事件进行得一个注册// 初始化组件事件
     // Vue渲染
-    initRender(vm) // 转换为vnode
+    initRender(vm) // 初始化渲染
 
     // 调用了钩子函数--beforeCreate
     callHook(vm, 'beforeCreate')
-    initInjections(vm) // resolve injections before data/props
+    initInjections(vm) // resolve injections before data/props  // 初始化  injections
     // 初始化State, --- 对data，props，computed等属性进行初始化
-    initState(vm)
+    initState(vm) // 初始化状态
+
+    // 为provide 选项应该是一个对象或返回一个对象的函数。该对象包含可注入其子孙的属性，用于组件之间通信
     initProvide(vm) // resolve provide after data/props
 
     // 调用钩子函数--created
-    callHook(vm, 'created')
+    callHook(vm, 'created') // 触发钩子函数  created
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -84,7 +88,7 @@ export function initMixin (Vue: Class<Component>) {
     // 如果没有传入options的el属性，则需要手动mount
     if (vm.$options.el) {
       
-      vm.$mount(vm.$options.el)
+      vm.$mount(vm.$options.el) // $mount 手动挂载 一个未挂载的实例
     }
   }
 }

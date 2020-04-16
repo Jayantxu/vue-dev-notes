@@ -18,6 +18,8 @@ type PropOptions = {
   validator: ?Function
 };
 
+
+// prop 验证，是否符合规范
 export function validateProp (
   key: string,
   propOptions: Object,
@@ -28,7 +30,7 @@ export function validateProp (
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // boolean casting
-  const booleanIndex = getTypeIndex(Boolean, prop.type)
+  const booleanIndex = getTypeIndex(Boolean, prop.type) // 检查数据类型
   if (booleanIndex > -1) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
@@ -43,7 +45,7 @@ export function validateProp (
   }
   // check default value
   if (value === undefined) {
-    value = getPropDefaultValue(vm, prop, key)
+    value = getPropDefaultValue(vm, prop, key) // 获取 prop 的默认值
     // since the default value is a fresh copy,
     // make sure to observe it.
     const prevShouldObserve = shouldObserve
@@ -56,7 +58,7 @@ export function validateProp (
     // skip validation for weex recycle-list child component props
     !(__WEEX__ && isObject(value) && ('@binding' in value))
   ) {
-    assertProp(prop, key, value, vm, absent)
+    assertProp(prop, key, value, vm, absent) // assertProp 判断 props  是否必填
   }
   return value
 }
@@ -114,7 +116,7 @@ function assertProp (
   if (value == null && !prop.required) {
     return
   }
-  let type = prop.type
+  let type = prop.type //获取 type
   let valid = !type || type === true
   const expectedTypes = []
   if (type) {
@@ -122,7 +124,7 @@ function assertProp (
       type = [type]
     }
     for (let i = 0; i < type.length && !valid; i++) {
-      const assertedType = assertType(value, type[i])
+      const assertedType = assertType(value, type[i]) // 检查type 的类型值，返回类型值
       expectedTypes.push(assertedType.expectedType || '')
       valid = assertedType.valid
     }

@@ -19,21 +19,26 @@ import { isUpdatingChildComponent } from './lifecycle'
 // 渲染,vnode相关
 export function initRender (vm: Component) {
 
-  vm._vnode = null // the root of the child tree
-  vm._staticTrees = null // v-once cached trees
+  vm._vnode = null // the root of the child tree // 添加 _vnode 
+  vm._staticTrees = null // v-once cached trees // 添加 _staticTrees
   const options = vm.$options
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
-  const renderContext = parentVnode && parentVnode.context
-  vm.$slots = resolveSlots(options._renderChildren, renderContext)
+  const renderContext = parentVnode && parentVnode.context 
+  vm.$slots = resolveSlots(options._renderChildren, renderContext) // slot
   vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
-  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+
+
+  //  ! ! ! 添加了_c 和 createElement 两个渲染方法
+  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)  
   // normalization is always applied for the public version, used in
   // user-written render functions.
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+
+
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated
@@ -48,6 +53,7 @@ export function initRender (vm: Component) {
       !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
     }, true)
   } else {
+    // 把  $attrs  和  $listeners  添加到 defineReactive 中, 监听数据只读， 不能修改
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
     defineReactive(vm, '$listeners', options._parentListeners || emptyObject, null, true)
   }
@@ -69,6 +75,9 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // 实例生成虚拟DOM /**生成虚拟DOM入口 */
+  // render 函数就是执行 genElement 函数时候，返回来的函数DOM，需要执行编译的函数，
+  // 尔后，会去执行  vm._c = createElement
+  
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
@@ -128,6 +137,7 @@ export function renderMixin (Vue: Class<Component>) {
     }
     // set parent
     vnode.parent = _parentVnode
+    // 返回 vnode
     return vnode
   }
 }

@@ -124,8 +124,10 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 /**
  * 目的：为非VNODE对象添加Observer
  */
+
+ // observe方法
 export function observe (value: any, asRootData: ?boolean): Observer | void {
-  // 判断是不是VNODE对象
+  // 判断是不是VNODE对象，传入参数必须是对象
   if (!isObject(value) || value instanceof VNode) {
     return
   }
@@ -168,7 +170,7 @@ export function defineReactive (
   key: string,
   val: any,
   customSetter?: ?Function,
-  shallow?: boolean
+  shallow?: boolean // 如果 shallow  为 true
 ) {
   // 对每一个属性对new一个Dep依赖
   const dep = new Dep()

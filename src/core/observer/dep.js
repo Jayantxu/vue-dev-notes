@@ -30,6 +30,7 @@ export default class Dep {
     this.subs.push(sub)
   }
 
+  // 删除subs 队列中的一个Watcher实例化对象
   removeSub (sub: Watcher) {
     remove(this.subs, sub)
   }
@@ -62,6 +63,7 @@ export default class Dep {
 Dep.target = null
 const targetStack = []
 
+// pushTarget  方法，将Watcher实例化对象  推入 targetStack队列中
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)
   Dep.target = target

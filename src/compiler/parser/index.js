@@ -79,6 +79,9 @@ export function createASTElement (
 /**
  * Convert HTML string to AST.
  */
+// 将  HTML 转  为 AST对象
+// parseHTML 函数
+
 export function parse (
   template: string,
   options: CompilerOptions
@@ -91,6 +94,7 @@ export function parse (
   const isReservedTag = options.isReservedTag || no
   maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
 
+  
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
@@ -204,6 +208,7 @@ export function parse (
     }
   }
 
+  // 
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,

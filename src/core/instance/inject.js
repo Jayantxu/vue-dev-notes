@@ -14,7 +14,8 @@ export function initProvide (vm: Component) {
 }
 
 export function initInjections (vm: Component) {
-  const result = resolveInject(vm.$options.inject, vm)
+  const result = resolveInject(vm.$options.inject, vm) // 调用resolveInject，抽取父组件的  provide, return 出来
+  //  如果有  provide 依赖注入
   if (result) {
     toggleObserving(false)
     Object.keys(result).forEach(key => {
@@ -29,6 +30,7 @@ export function initInjections (vm: Component) {
           )
         })
       } else {
+        // 将注入的  "result" 依赖加入观察者，
         defineReactive(vm, key, result[key])
       }
     })
@@ -36,6 +38,7 @@ export function initInjections (vm: Component) {
   }
 }
 
+// 循环抽取出父组件的 provide  , return 回去
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached

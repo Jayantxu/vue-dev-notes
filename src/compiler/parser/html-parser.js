@@ -51,6 +51,8 @@ function decodeAttr (value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match])
 }
 
+
+// parseHTML 
 export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
@@ -58,16 +60,22 @@ export function parseHTML (html, options) {
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
+
+// 循环HTML
+
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
+    // 查找截取  tag 标签、 tag属性、 指令、 组件等
+    // 通过  advance 函数去截取每次匹配的标签属性等
+
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<') // 记录这个 < 的位置，如果其位置在第一个位置，说明这个模板字符串是以其他5种类型开始的。
       if (textEnd === 0) {
-        // Comment:
+        // Comment:  // 如果匹配到  comment  注释
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
-
+          //  添加到注释节点
           if (commentEnd >= 0) {
             if (options.shouldKeepComment) {
               options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
@@ -103,8 +111,8 @@ export function parseHTML (html, options) {
           continue
         }
 
-        // Start tag:
-        const startTagMatch = parseStartTag()
+        // Start tag:  // 如果匹配到开始标签  
+        const startTagMatch = parseStartTag()  // 执行  parseStartTag 函数
         if (startTagMatch) {
           handleStartTag(startTagMatch)
           if (shouldIgnoreFirstNewline(startTagMatch.tagName, html)) {
@@ -142,6 +150,9 @@ export function parseHTML (html, options) {
         advance(text.length)
       }
 
+      /**
+       * options.chars  把text添加到属性节点或者注释节点
+       */
       if (options.chars && text) {
         options.chars(text, index - text.length, index)
       }
@@ -185,14 +196,14 @@ export function parseHTML (html, options) {
     index += n
     html = html.substring(n)
   }
-  // 解析开始标签元素
+  // 解析开始标签元素，获取名称，收集属性，开始与结束位置
   function parseStartTag () {
     const start = html.match(startTagOpen)
     // '<div></div>'.match(startTagOpen)  => ['<div','div',index:0,input:'<div></div>']
     if (start) {
       const match = {
-        tagName: start[1],
-        attrs: [],
+        tagName: start[1], // 记录标签名
+        attrs: [], // 属性
         start: index
       }
       advance(start[0].length)
@@ -204,6 +215,7 @@ export function parseHTML (html, options) {
        * 自闭合标签剩下：'/>'
        * 非自闭合标签剩下：'></div>'
        */
+      // 匹配  attr 属性
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index
         advance(attr[0].length)
@@ -222,7 +234,7 @@ export function parseHTML (html, options) {
         match.unarySlash = end[1]
         advance(end[0].length)
         match.end = index
-        return match
+        return match // 返回对象
       }
     }
   }
@@ -232,8 +244,8 @@ export function parseHTML (html, options) {
     const unarySlash = match.unarySlash // 记录是否自闭合标签
 
     if (expectHTML) {
-      if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
-        parseEndTag(lastTag)
+      if (lastTag === 'p' && isNonPhrasingTag(tagName)) { // isNonPhrasingTag  判断标签是否是  ...等
+        parseEndTag(lastTag) // 查找  paserHTML 的  stack栈  中是否有与当前标签名相同的标签
       }
       if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
         parseEndTag(tagName)
@@ -244,7 +256,7 @@ export function parseHTML (html, options) {
 
     const l = match.attrs.length
     const attrs = new Array(l)
-    // 循环取出标签attr的数组
+    // 循环取出标签attr的数组，把数组对象属性值循环变成对象，可以过滤相同属性
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       const value = args[3] || args[4] || args[5] || ''
@@ -254,7 +266,7 @@ export function parseHTML (html, options) {
       // 将提取后的值放入数组中
       attrs[i] = {
         name: args[1],
-        value: decodeAttr(value, shouldDecodeNewlines)
+        value: decodeAttr(value, shouldDecodeNewlines) // decodeAttr 函数 ,替换HTML 中的特殊符号，转义为JS解析的字符串
       }
       if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         attrs[i].start = args.start + args[0].match(/^\s*/).length
@@ -269,9 +281,16 @@ export function parseHTML (html, options) {
     }
 
     if (options.start) {
+      // 标签开始函数，创建一个  AST 标签  DOM
       options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
+
+  /**
+   * options.start 函数， 标签开始函数，创建一个  AST DOM 
+   * options.end 函数，
+   */
+
 
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName
