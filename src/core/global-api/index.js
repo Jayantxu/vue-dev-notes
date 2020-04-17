@@ -18,6 +18,7 @@ import {
   defineReactive
 } from '../util/index'
 
+// 为 Vue 添加静态方法和属性
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
@@ -29,6 +30,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
       )
     }
   }
+  // 监听 config ，改值不可以修改
   Object.defineProperty(Vue, 'config', configDef)
 
   // exposed util methods.

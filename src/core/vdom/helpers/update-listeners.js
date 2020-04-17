@@ -11,6 +11,7 @@ import {
   isPlainObject
 } from 'shared/util'
 
+//  为事件多添加 change 或者 input
 const normalizeEvent = cached((name: string): {
   name: string,
   once: boolean,
@@ -33,6 +34,7 @@ const normalizeEvent = cached((name: string): {
   }
 })
 
+// 
 export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component): Function {
   function invoker () {
     const fns = invoker.fns
@@ -59,6 +61,8 @@ export function updateListeners (
   vm: Component
 ) {
   let name, def, cur, old, event
+
+  // 循环 vnode 中 on 事件存储对象
   for (name in on) {
     def = cur = on[name]
     old = oldOn[name]

@@ -26,11 +26,17 @@ import {
  * how to merge a parent option value and a child option
  * value into the final value.
  */
+
+//  strats 类
+
 const strats = config.optionMergeStrategies
 
 /**
  * Options with restrictions
  */
+
+// strats.el = strats.propsData
+
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
@@ -39,6 +45,7 @@ if (process.env.NODE_ENV !== 'production') {
         'creation with the `new` keyword.'
       )
     }
+    // 返回 defaultStrats
     return defaultStrat(parent, child)
   }
 }
@@ -46,6 +53,10 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Helper that recursively merges two data objects together.
  */
+
+//  
+
+
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
   let key, toVal, fromVal
@@ -83,6 +94,10 @@ export function mergeDataOrFn (
 ): ?Function {
   if (!vm) {
     // in a Vue.extend merge, both should be functions
+
+    // 如果  childVal 不存在，就返回parentVal ，
+    // 如果  parentVal 不存在， 就返回 childVal
+
     if (!childVal) {
       return parentVal
     }
@@ -94,6 +109,8 @@ export function mergeDataOrFn (
     // merged result of both functions... no need to
     // check if parentVal is a function here because
     // it has to be a function to pass previous merges.
+
+    // 返回mergeDate
     return function mergedDataFn () {
       return mergeData(
         typeof childVal === 'function' ? childVal.call(this, this) : childVal,
@@ -134,6 +151,8 @@ strats.data = function (
 
       return parentVal
     }
+    
+    // 递归合并 数据，深度拷贝
     return mergeDataOrFn(parentVal, childVal)
   }
 
@@ -143,6 +162,7 @@ strats.data = function (
 /**
  * Hooks and props are merged as arrays.
  */
+// 
 function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
@@ -169,6 +189,7 @@ function dedupeHooks (hooks) {
   return res
 }
 
+// 循环  LIFECYCLE_HOOKS 为 strats不同的key 添加 mergeHook方法
 LIFECYCLE_HOOKS.forEach(hook => {
   strats[hook] = mergeHook
 })
@@ -195,6 +216,7 @@ function mergeAssets (
   }
 }
 
+// 循环为 strats 添加方法
 ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
@@ -205,6 +227,8 @@ ASSET_TYPES.forEach(function (type) {
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
+
+//  strats.watch 循环childVal
 strats.watch = function (
   parentVal: ?Object,
   childVal: ?Object,
@@ -222,9 +246,13 @@ strats.watch = function (
   if (!parentVal) return childVal
   const ret = {}
   extend(ret, parentVal)
+
+  // 循环  childVal，
   for (const key in childVal) {
     let parent = ret[key]
     const child = childVal[key]
+    
+    // 判断父节点上是否有值
     if (parent && !Array.isArray(parent)) {
       parent = [parent]
     }

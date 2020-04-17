@@ -4,11 +4,12 @@ import { activeInstance } from 'core/instance/lifecycle'
 import { resolveTransition } from 'web/runtime/transition-util'
 
 export default {
-  create: enter,
+  create: enter, // 
   activate: enter,
   remove: leave
 }
 
+//  enter 进入或激活过渡动画，
 function enter (_, vnode) {
   const el = vnode.elm
 
@@ -18,6 +19,7 @@ function enter (_, vnode) {
     el._leaveCb()
   }
 
+  // 解析 vnode 中的 transition ， 获取 一个 CSS 过度对象类
   const data = resolveTransition(vnode.data.transition)
   if (!data) {
     return

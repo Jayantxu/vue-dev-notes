@@ -8,13 +8,16 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   const data: VNodeData = vnode.data
   const oldData: VNodeData = oldVnode.data
+
   if (!data.staticClass &&
     !data.class &&
     (!oldData || (!oldData.staticClass && !oldData.class))
   ) {
     return
   }
-
+  
+  // 获取vnode 中的 data.staticClass 和 data.class
+  
   const oldClassList = makeClassList(oldData)
   const classList = makeClassList(data)
 

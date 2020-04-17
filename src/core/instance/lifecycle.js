@@ -55,6 +55,7 @@ export function initLifecycle (vm: Component) {
   vm._isBeingDestroyed = false
 }
 
+// 为 原型 添加 _update  $forceUpdate   $destory
 export function lifecycleMixin (Vue: Class<Component>) {
 
 

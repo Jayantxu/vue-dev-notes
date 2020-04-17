@@ -66,9 +66,10 @@ export function setCurrentRenderingInstance (vm: Component) {
   currentRenderingInstance = vm
 }
 
+// 为 Vue 原型 添加 $nextTick   _render，以及 installRenderHelpers 中添加
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
-  installRenderHelpers(Vue.prototype)
+  installRenderHelpers(Vue.prototype) // 为 原型添加  _o,_n,_s,_l,...等等等
 
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)

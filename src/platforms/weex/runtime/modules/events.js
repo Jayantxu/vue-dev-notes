@@ -4,6 +4,7 @@ import { updateListeners } from 'core/vdom/helpers/update-listeners'
 
 let target: any
 
+// 柯里化函数，返回一个直接调用函数的方法，然后 remove
 function createOnceHandler (event, handler, capture) {
   const _target = target // save current target element in closure
   return function onceHandler () {
@@ -43,8 +44,8 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
-  target = vnode.elm
-  updateListeners(on, oldOn, add, remove, createOnceHandler, vnode.context)
+  target = vnode.elm // 获取真实DOM
+  updateListeners(on, oldOn, add, remove, createOnceHandler, vnode.context) // 更新事件
   target = undefined
 }
 

@@ -4,7 +4,10 @@ import { emptyNode } from 'core/vdom/patch'
 import { resolveAsset, handleError } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 
+// create 、 update 、 destory创建，更新，销毁组件
 export default {
+  // 都是  updateDirectives
+
   create: updateDirectives,
   update: updateDirectives,
   destroy: function unbindDirectives (vnode: VNodeWithData) {
@@ -12,20 +15,27 @@ export default {
   }
 }
 
+// 如果 vnode 中存在指令
 function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (oldVnode.data.directives || vnode.data.directives) {
+    // 调用 _update
     _update(oldVnode, vnode)
   }
 }
 
+// 更新指令
 function _update (oldVnode, vnode) {
   const isCreate = oldVnode === emptyNode
   const isDestroy = vnode === emptyNode
+
+  // normalizeDirectives 规范化指令，返回指令的数据jihe
   const oldDirs = normalizeDirectives(oldVnode.data.directives, oldVnode.context)
   const newDirs = normalizeDirectives(vnode.data.directives, vnode.context)
 
   const dirsWithInsert = []
   const dirsWithPostpatch = []
+
+  // callHook 用于触发指令的钩子函数
 
   let key, oldDir, dir
   for (key in newDirs) {

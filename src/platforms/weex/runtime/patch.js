@@ -9,6 +9,11 @@ import platformModules from 'weex/runtime/modules/index'
 // built-in modules have been applied.
 const modules = platformModules.concat(baseModules)
 
+
+// createPatchFunction 传 nodeOps 和 modules 对象进去
+// nodeOps 对象，   ->  runtime/node-ops
+// modules 对象  ->  baseModules + platformModules 组成 -> /vdom/modules/index
+
 export const patch: Function = createPatchFunction({
   nodeOps,
   modules,

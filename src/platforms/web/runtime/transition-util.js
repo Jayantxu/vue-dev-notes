@@ -4,6 +4,7 @@ import { inBrowser, isIE9 } from 'core/util/index'
 import { addClass, removeClass } from './class-util'
 import { remove, extend, cached } from 'shared/util'
 
+
 export function resolveTransition (def?: string | Object): ?Object {
   if (!def) {
     return
@@ -12,6 +13,7 @@ export function resolveTransition (def?: string | Object): ?Object {
   if (typeof def === 'object') {
     const res = {}
     if (def.css !== false) {
+      // 通过 name 属性 获取过渡CSS类名
       extend(res, autoCssTransition(def.name || 'v'))
     }
     extend(res, def)
@@ -21,6 +23,7 @@ export function resolveTransition (def?: string | Object): ?Object {
   }
 }
 
+// 通过 name 属性 获取过渡CSS类名
 const autoCssTransition: (name: string) => Object = cached(name => {
   return {
     enterClass: `${name}-enter`,
@@ -64,12 +67,14 @@ const raf = inBrowser
     : setTimeout
   : /* istanbul ignore next */ fn => fn()
 
+
+// 下一帧， 如果浏览器支持 requestAnimationFrame 就用 requestAnimationFrame，不支持就用 setTimeOut
 export function nextFrame (fn: Function) {
   raf(() => {
     raf(fn)
   })
 }
-
+// 为真实的dom标签 添加 class 样式类
 export function addTransitionClass (el: any, cls: string) {
   const transitionClasses = el._transitionClasses || (el._transitionClasses = [])
   if (transitionClasses.indexOf(cls) < 0) {
@@ -78,6 +83,7 @@ export function addTransitionClass (el: any, cls: string) {
   }
 }
 
+// 删除vnode 的 class类，和 删除真实DOM的 class类
 export function removeTransitionClass (el: any, cls: string) {
   if (el._transitionClasses) {
     remove(el._transitionClasses, cls)

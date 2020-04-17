@@ -2,6 +2,8 @@
 
 import { extend } from 'shared/util'
 
+
+// 更新设置真实DOM属性值，通过新旧Vnode 对比
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.attrs && !vnode.data.attrs) {
     return
@@ -15,6 +17,10 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     attrs = vnode.data.attrs = extend({}, attrs)
   }
 
+  // 比较新 Vnode 和 旧 Vnode 中的属性
+  // 如果不相等则设置属性，更新属性值
+  // 如果新 Vnode 属性中没有， 则删除属性值
+
   const supportBatchUpdate = typeof elm.setAttrs === 'function'
   const batchedAttrs = {}
   for (key in attrs) {
@@ -27,6 +33,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   for (key in oldAttrs) {
+    
     if (attrs[key] == null) {
       supportBatchUpdate
         ? (batchedAttrs[key] = undefined)
@@ -40,5 +47,5 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
 export default {
   create: updateAttrs,
-  update: updateAttrs
+  update: updateAttrs // 更新设置真实 DOM 属性
 }

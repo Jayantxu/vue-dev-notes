@@ -4,6 +4,8 @@ import { extend, cached, camelize } from 'shared/util'
 
 const normalize = cached(camelize)
 
+
+// 创建  Style
 function createStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!vnode.data.staticStyle) {
     updateStyle(oldVnode, vnode)
@@ -26,6 +28,7 @@ function createStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   updateStyle(oldVnode, vnode)
 }
 
+// 更新 Style
 function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.style && !vnode.data.style) {
     return
@@ -68,6 +71,7 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
+// 将数组转化 为 对象，并且合并对象
 function toObject (arr) {
   const res = {}
   for (let i = 0; i < arr.length; i++) {
